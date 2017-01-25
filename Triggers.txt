@@ -1,0 +1,145 @@
+
+//OGRENCILER TABLOSU AUTO INCREMENT TRIGGERI
+create sequence ogrenciNo1
+START WITH 1
+   INCREMENT BY 1
+   MAXVALUE 999999999999999999;
+
+create or replace trigger ogrenciID
+before insert on OGRENCILER
+referencing new as new old as old
+for each row
+declare
+    integrity_error exception;
+    errno integer;
+    errmsg char(200);
+    dummy integer;
+    found boolean;
+begin
+    select ogrenciNo1.nextval into :new.OGRENCI_ID from dual;
+exception
+    when integrity_error then
+        raise_application_error(errno, errmsg);
+end;
+
+//OGRENCILER TABLOSU AUTO INCREMENT TRIGGERI//
+
+
+
+//VELILER TABLOSU AUTO INCREMENT TRIGGERI
+create sequence veliNo2
+START WITH 1
+   INCREMENT BY 1
+   MAXVALUE 999999999999999999;
+
+create or replace trigger veliID
+before insert on VELILER
+referencing new as new old as old
+for each row
+declare
+    integrity_error exception;
+    errno integer;
+    errmsg char(200);
+    dummy integer;
+    found boolean;
+begin
+    select veliNo2.nextval into :new.VELI_ID from dual;
+exception
+    when integrity_error then
+        raise_application_error(errno, errmsg);
+end;
+
+//VELILER TABLOSU AUTO INCREMENT TRIGGERI//
+
+
+//OGRETMENLER AUTO INCREMENT TRIGGER
+
+
+create sequence ogretmenID2
+START WITH 4895
+   INCREMENT BY 1
+   MAXVALUE 999999999999999999;
+
+create or replace trigger ogretmenId
+before insert on OGRETMENLER
+referencing new as new old as old
+for each row
+declare
+    integrity_error exception;
+    errno integer;
+    errmsg char(200);
+    dummy integer;
+    found boolean;
+begin
+    select ogretmenID2.nextval into :new.OGRETMEN_ID from dual;
+exception
+    when integrity_error then
+        raise_application_error(errno, errmsg);
+end;
+
+// OGRETMENLER AUTO INCREMENT TRIGGER
+
+
+//OGRENCILER SILINDIGINDE OGRENCI_ESKI TABLOSUNA KAYIT DUSUYOR
+CREATE OR REPLACE TRIGGER ogrenci_silme_sonrasi
+AFTER DELETE  ON OGRENCILER
+   FOR EACH ROW
+   BEGIN
+
+   INSERT INTO OGRENCI_ESKI
+   ( OGRENCI_ID,
+     SINIF_ID,
+     KAYIT_TARIHI)
+   VALUES
+   ( :old.OGRENCI_ID,
+     :old.SINIF_ID,
+     
+     sysdate);
+
+END;
+//OGRENCILER SILINDIGINDE OGRENCI_ESKI TABLOSUNA KAYIT DUSUYOR
+
+
+//OGRENCI EKLENDIGINDE ODEMELER TABLOSUNA ODEME BILGISI KAYDI YAPILIYOR
+
+CREATE OR REPLACE TRIGGER odeme_ekleme2
+AFTER INSERT  ON OGRENCILER
+   FOR EACH ROW
+   BEGIN
+
+   INSERT INTO ODEMELER
+   ( VELI_ID,
+     OGRENCI_ID, TAKSIT_SAYISI,
+     KAYIT_TARIHI)
+   VALUES
+   (:new.VELI_ID, 
+   :new.OGRENCI_ID,
+     :new.TAKSIT_SAYISI,
+     sysdate);
+
+END;
+
+//OGRENCI EKLENDIGINDE ODEMELER TABLOSUNA ODEME BILGISI KAYDI YAPILIYOR
+
+
+
+//OGRETMEN EKLERKEN SINIF BILGISINE GORE SINIFLAR TABLOSUNDAKI OGRETMEN_ID DEGERI SECILEN SINIF ICIN UPDATE EDILIYOR
+
+
+create or replace TRIGGER ogretmen_sinif_atama2
+AFTER INSERT  ON OGRETMENLER
+   FOR EACH ROW
+   BEGIN
+
+   UPDATE SINIFLAR
+   SET OGRETMEN_ID = :new.OGRETMEN_ID
+  WHERE SINIF_ID =:new.SINIF_ID;
+
+END;
+
+//OGRETMEN EKLERKEN SINIF BILGISINE GORE SINIFLAR TABLOSUNDAKI OGRETMEN_ID DEGERI SECILEN SINIF ICIN UPDATE EDILIYOR
+
+
+
+
+
